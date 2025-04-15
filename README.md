@@ -105,9 +105,9 @@ git clone https://github.com/jingyaogong/minimind-v
 
 ```bash
 # 下载clip模型到 ./model/vision_model 目录下
-git clone https://huggingface.co/openai/clip-vit-base-patch16
+git lfs clone https://huggingface.co/openai/clip-vit-base-patch16
 # or
-git clone https://www.modelscope.cn/models/openai-mirror/clip-vit-base-patch16
+git lfs clone https://www.modelscope.cn/models/openai-mirror/clip-vit-base-patch16
 ```
 
 ```bash
