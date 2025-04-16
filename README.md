@@ -425,6 +425,8 @@ print(answer)
 其核心算法改动`< 50行`，迁移难度极低。
 因此可能和`LlAVA`等模型细节可能存在区别，但思路完全统一。
 
+
+
 # 📌 Experiment
 
 ## Ⅰ 数据集
@@ -657,6 +659,71 @@ LLM性能越强，对应的VLM必然越强，此时效果增益会很明显。
 > Clip模型可以尝试更大性能更强的large系列，用更具细粒度的token表征图像特征，目前仍粗糙。
 > 分辨率不高，理论上只有224×224（minimind-v数据集为节省空间，仅设定为128×128）。
 > ...
+```
+
+### 参考图：
+```mermaid
+graph TD
+    subgraph Input
+        img[Image Input]
+        txt[Text Input]
+    end
+
+    subgraph Preprocessing
+        imgPrep[Image Preprocessing]
+        txtPrep[Text Tokenization]
+        img --> imgPrep
+        txt --> txtPrep
+    end
+
+    subgraph Vision_Encoder
+        clipVision[CLIP Vision Encoder]
+        imgFeats[Image Features 196x768]
+        imgPrep --> clipVision
+        clipVision --> imgFeats
+    end
+
+    subgraph Feature_Projection
+        proj[Vision Projection Layer]
+        alignedFeats[Aligned Features 196x512]
+        imgFeats --> proj
+        proj --> alignedFeats
+    end
+
+    subgraph Language_Model
+        embed[Token Embeddings]
+        attn[Self Attention]
+        ffn[Feed Forward]
+        norm[Layer Norm]
+        output[Output Layer]
+
+        txtPrep --> embed
+        embed --> attn
+        attn --> ffn
+        ffn --> norm
+        norm --> output
+    end
+
+    subgraph Fusion
+        replace[Token Replacement]
+        alignedFeats --> replace
+        embed --> replace
+    end
+
+    subgraph Training
+        pretrain[Pretraining Phase]
+        sft[Supervised Fine-tuning]
+        pretrain --> sft
+    end
+
+    subgraph Loss
+        crossEntropy[Cross Entropy Loss]
+        output --> crossEntropy
+    end
+
+    replace --> attn
+    crossEntropy --> pretrain
+    crossEntropy --> sft
 ```
 
 # 📌 Acknowledge
