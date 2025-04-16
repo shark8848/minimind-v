@@ -662,6 +662,92 @@ LLM性能越强，对应的VLM必然越强，此时效果增益会很明显。
 ```
 
 ### 参考图：
+#### 1）整体流程
+```mermaid
+graph TB
+    User((User))
+
+    subgraph "MiniMind-V System"
+        subgraph "Web Interface"
+            WebDemo["Web Demo<br>Gradio"]
+            
+            subgraph "Web Components"
+                ImageInput["Image Input<br>Gradio Image"]
+                ChatInterface["Chat Interface<br>Gradio Chatbot"]
+                ParameterSliders["Parameter Controls<br>Gradio Sliders"]
+            end
+        end
+
+        subgraph "Vision-Language Model"
+            VLMCore["MiniMind VLM<br>PyTorch"]
+            
+            subgraph "Core Components"
+                VisionEncoder["Vision Encoder<br>CLIP ViT-B/16"]
+                VisionProjector["Vision Projector<br>Linear Layer"]
+                LMModel["Language Model<br>MiniMind LM"]
+                TokenEmbedding["Token Embeddings<br>PyTorch Embeddings"]
+                Tokenizer["Tokenizer<br>HuggingFace"]
+            end
+        end
+
+        subgraph "Data Processing"
+            DataLoader["Dataset Loader<br>PyTorch DataLoader"]
+            
+            subgraph "Data Components"
+                ImageProcessor["Image Processor<br>CLIP Processor"]
+                ChatTemplater["Chat Templater<br>Custom"]
+                LossMaskGenerator["Loss Mask Generator<br>Custom"]
+            end
+        end
+
+        subgraph "Training System"
+            TrainerModule["Model Trainer<br>PyTorch"]
+            
+            subgraph "Training Components"
+                Optimizer["Optimizer<br>AdamW"]
+                LossFunction["Loss Function<br>CrossEntropy"]
+                GradScaler["Gradient Scaler<br>AMP"]
+                ModelCheckpoint["Checkpoint Manager<br>PyTorch Save/Load"]
+            end
+        end
+    end
+
+    subgraph "External Systems"
+        WandB["Monitoring<br>Weights & Biases"]
+        FileSystem["File Storage<br>Local Disk"]
+    end
+
+    %% User Interactions
+    User -->|Interacts with| WebDemo
+    
+    %% Web Interface Connections
+    WebDemo -->|Uses| ImageInput
+    WebDemo -->|Uses| ChatInterface
+    WebDemo -->|Uses| ParameterSliders
+    
+    %% Core Model Flow
+    ImageInput -->|Processes| ImageProcessor
+    ImageProcessor -->|Feeds to| VisionEncoder
+    VisionEncoder -->|Projects| VisionProjector
+    VisionProjector -->|Combines with| LMModel
+    ChatInterface -->|Tokenizes via| Tokenizer
+    Tokenizer -->|Embeds through| TokenEmbedding
+    TokenEmbedding -->|Feeds to| LMModel
+    
+    %% Training Flow
+    DataLoader -->|Provides data to| TrainerModule
+    TrainerModule -->|Updates| VLMCore
+    TrainerModule -->|Uses| Optimizer
+    TrainerModule -->|Calculates| LossFunction
+    TrainerModule -->|Scales gradients| GradScaler
+    TrainerModule -->|Saves state| ModelCheckpoint
+    
+    %% External Connections
+    TrainerModule -->|Logs metrics to| WandB
+    ModelCheckpoint -->|Saves to| FileSystem
+    DataLoader -->|Reads from| FileSystem
+```
+#### 2）训练流程
 ```mermaid
 graph TD
     subgraph Input
